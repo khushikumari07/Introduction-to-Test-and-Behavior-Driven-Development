@@ -46,24 +46,47 @@ def mock_db():
     """Fixture to simulate a mock database."""
     return sample_products.copy()
 
-def test_read_product(mock_db):
-    """Test reading a product by ID."""
 
-    # Fetch product from mock database
-    product_id = 1
-    product = next((p for p in mock_db if p.id == product_id), None)
+def test_read_a_product(mock_db):
+    """It should Read a Product"""
+
+    # Create a Product
+    product = Product(
+        id=5,
+        name="Mouse",
+        description="Wireless Mouse",
+        category="Electronics",
+        price=49.99,
+        quantity=25,
+        available=True
+    )
+
+    # Add Product to mock database
+    mock_db.append(product)
+
+    # Retrieve Product by id
+    found_product = next(
+        (p for p in mock_db if p.id == product.id),
+        None
+    )
 
     # Assertions
-    assert product is not None
-    assert product.id == 1
-    assert product.description == "Gaming Laptop"
-    assert product.price == 1200.99
+    assert found_product is not None
+    assert found_product.id == product.id
+    assert found_product.name == product.name
+    assert found_product.description == product.description
+    assert found_product.price == product.price
+
 
 def test_update_product(mock_db):
     """Test updating a product."""
 
     product_id = 2
-    product = next((p for p in mock_db if p.id == product_id), None)
+
+    product = next(
+        (p for p in mock_db if p.id == product_id),
+        None
+    )
 
     assert product is not None
 
@@ -71,19 +94,28 @@ def test_update_product(mock_db):
 
     assert product.price == 149.99
 
+
 def test_delete_product(mock_db):
     """Test deleting a product."""
 
     product_id = 3
 
-    mock_db = [p for p in mock_db if p.id != product_id]
+    mock_db = [
+        p for p in mock_db
+        if p.id != product_id
+    ]
 
-    assert all(p.id != product_id for p in mock_db)
+    assert all(
+        p.id != product_id
+        for p in mock_db
+    )
+
 
 def test_list_all_products(mock_db):
     """Test listing all products."""
 
     assert len(mock_db) == 4
+
 
 def test_find_by_name(mock_db):
     """Test finding a product by name."""
@@ -91,12 +123,16 @@ def test_find_by_name(mock_db):
     product_name = "T-shirt"
 
     product = next(
-        (p for p in mock_db if p.name.lower() == product_name.lower()),
+        (
+            p for p in mock_db
+            if p.name.lower() == product_name.lower()
+        ),
         None
     )
 
     assert product is not None
     assert product.category == "Clothing"
+
 
 def test_find_by_category(mock_db):
     """Test finding products by category."""
@@ -110,9 +146,13 @@ def test_find_by_category(mock_db):
 
     assert len(products) == 2
 
+
 def test_find_by_availability(mock_db):
     """Test finding available products."""
 
-    products = [p for p in mock_db if p.available]
+    products = [
+        p for p in mock_db
+        if p.available
+    ]
 
     assert len(products) == 3
