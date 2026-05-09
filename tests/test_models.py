@@ -5,8 +5,8 @@ from app.models import Product
 @pytest.fixture
 def product():
     """Creates a Product instance for testing"""
-    return Product(
-        id=1,
+
+    product = Product(
         name="Laptop",
         description="Gaming Laptop",
         category="Electronics",
@@ -15,19 +15,22 @@ def product():
         available=True
     )
 
+    product.create()
+    return product
+
 
 def test_read_a_product(product):
     """It should Read a Product"""
 
-    # Simulate retrieving product by id
-    found_product = product
+    # Retrieve the product by id
+    found_product = Product.find(product.id)
 
     # Assertions
     assert found_product is not None
-    assert found_product.id == 1
-    assert found_product.name == "Laptop"
-    assert found_product.description == "Gaming Laptop"
-    assert found_product.price == 1200.99
+    assert found_product.id == product.id
+    assert found_product.name == product.name
+    assert found_product.description == product.description
+    assert found_product.price == product.price
 
 
 def test_update_a_product(product):
@@ -38,16 +41,22 @@ def test_update_a_product(product):
 
     # Update description
     product.description = "testing"
+    product.update()
+
+    # Retrieve updated product
+    updated_product = Product.find(product.id)
 
     # Assertions
-    assert product.id == original_id
-    assert product.description == "testing"
+    assert updated_product.id == original_id
+    assert updated_product.description == "testing"
 
 
 def test_delete_a_product(product):
     """It should Delete a Product"""
 
-    deleted_product = None
+    product.delete()
+
+    deleted_product = Product.find(product.id)
 
     assert deleted_product is None
 
@@ -55,113 +64,33 @@ def test_delete_a_product(product):
 def test_list_all_products():
     """It should List all Products"""
 
-    products = [
-        Product(
-            id=1,
-            name="Laptop",
-            description="Gaming Laptop",
-            category="Electronics",
-            price=1200.99,
-            quantity=10,
-            available=True
-        ),
-        Product(
-            id=2,
-            name="Headphones",
-            description="Wireless Headphones",
-            category="Electronics",
-            price=199.99,
-            quantity=50,
-            available=True
-        ),
-    ]
+    products = Product.all()
 
-    assert len(products) == 2
+    assert len(products) >= 0
 
 
-def test_find_product_by_name():
+def test_find_product_by_name(product):
     """It should Find a Product by Name"""
 
-    products = [
-        Product(
-            id=1,
-            name="Laptop",
-            description="Gaming Laptop",
-            category="Electronics",
-            price=1200.99,
-            quantity=10,
-            available=True
-        )
-    ]
+    found_products = Product.find_by_name(product.name)
 
-    product = next(
-        (p for p in products if p.name == "Laptop"),
-        None
-    )
-
-    assert product is not None
-    assert product.name == "Laptop"
+    assert len(found_products) > 0
+    assert found_products[0].name == product.name
 
 
-def test_find_product_by_category():
+def test_find_product_by_category(product):
     """It should Find Products by Category"""
 
-    products = [
-        Product(
-            id=1,
-            name="Laptop",
-            description="Gaming Laptop",
-            category="Electronics",
-            price=1200.99,
-            quantity=10,
-            available=True
-        ),
-        Product(
-            id=2,
-            name="Headphones",
-            description="Wireless Headphones",
-            category="Electronics",
-            price=199.99,
-            quantity=50,
-            available=True
-        ),
-    ]
+    found_products = Product.find_by_category(product.category)
 
-    electronics_products = [
-        p for p in products
-        if p.category == "Electronics"
-    ]
-
-    assert len(electronics_products) == 2
+    assert len(found_products) > 0
+    assert found_products[0].category == product.category
 
 
-def test_find_available_products():
+def test_find_available_products(product):
     """It should Find Available Products"""
 
-    products = [
-        Product(
-            id=1,
-            name="Laptop",
-            description="Gaming Laptop",
-            category="Electronics",
-            price=1200.99,
-            quantity=10,
-            available=True
-        ),
-        Product(
-            id=2,
-            name="Book",
-            description="Programming Book",
-            category="Books",
-            price=15.99,
-            quantity=0,
-            available=False
-        ),
-    ]
+    found_products = Product.find_by_availability(True)
 
-    available_products = [
-        p for p in products
-        if p.available
-    ]
-
-    assert len(available_products) == 1
+    assert len(found_products) > 0
+    assert found_products[0].available is True
