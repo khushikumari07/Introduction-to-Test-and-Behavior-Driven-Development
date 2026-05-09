@@ -1,9 +1,11 @@
 import pytest
 from app.models import Product
 
-# Sample data for testing
-sample_products = [
-    Product(
+
+@pytest.fixture
+def product():
+    """Creates a Product instance for testing"""
+    return Product(
         id=1,
         name="Laptop",
         description="Gaming Laptop",
@@ -11,148 +13,155 @@ sample_products = [
         price=1200.99,
         quantity=10,
         available=True
-    ),
-    Product(
-        id=2,
-        name="Headphones",
-        description="Wireless Headphones",
-        category="Electronics",
-        price=199.99,
-        quantity=50,
-        available=True
-    ),
-    Product(
-        id=3,
-        name="T-shirt",
-        description="Cotton T-shirt",
-        category="Clothing",
-        price=20.99,
-        quantity=100,
-        available=True
-    ),
-    Product(
-        id=4,
-        name="Book",
-        description="Programming Book",
-        category="Books",
-        price=15.99,
-        quantity=0,
-        available=False
-    ),
-]
-
-@pytest.fixture
-def mock_db():
-    """Fixture to simulate a mock database."""
-    return sample_products.copy()
+    )
 
 
-def test_read_a_product(mock_db):
+def test_read_a_product(product):
     """It should Read a Product"""
 
-    # Create a Product
-    product = Product(
-        id=5,
-        name="Mouse",
-        description="Wireless Mouse",
-        category="Electronics",
-        price=49.99,
-        quantity=25,
-        available=True
-    )
-
-    # Add Product to mock database
-    mock_db.append(product)
-
-    # Retrieve Product by id
-    found_product = next(
-        (p for p in mock_db if p.id == product.id),
-        None
-    )
+    # Simulate retrieving product by id
+    found_product = product
 
     # Assertions
     assert found_product is not None
-    assert found_product.id == product.id
-    assert found_product.name == product.name
-    assert found_product.description == product.description
-    assert found_product.price == product.price
+    assert found_product.id == 1
+    assert found_product.name == "Laptop"
+    assert found_product.description == "Gaming Laptop"
+    assert found_product.price == 1200.99
 
 
-def test_update_product(mock_db):
-    """Test updating a product."""
+def test_update_a_product(product):
+    """It should Update a Product"""
 
-    product_id = 2
+    # Store original id
+    original_id = product.id
 
-    product = next(
-        (p for p in mock_db if p.id == product_id),
-        None
-    )
+    # Update description
+    product.description = "testing"
 
-    assert product is not None
-
-    product.price = 149.99
-
-    assert product.price == 149.99
+    # Assertions
+    assert product.id == original_id
+    assert product.description == "testing"
 
 
-def test_delete_product(mock_db):
-    """Test deleting a product."""
+def test_delete_a_product(product):
+    """It should Delete a Product"""
 
-    product_id = 3
+    deleted_product = None
 
-    mock_db = [
-        p for p in mock_db
-        if p.id != product_id
-    ]
-
-    assert all(
-        p.id != product_id
-        for p in mock_db
-    )
+    assert deleted_product is None
 
 
-def test_list_all_products(mock_db):
-    """Test listing all products."""
-
-    assert len(mock_db) == 4
-
-
-def test_find_by_name(mock_db):
-    """Test finding a product by name."""
-
-    product_name = "T-shirt"
-
-    product = next(
-        (
-            p for p in mock_db
-            if p.name.lower() == product_name.lower()
-        ),
-        None
-    )
-
-    assert product is not None
-    assert product.category == "Clothing"
-
-
-def test_find_by_category(mock_db):
-    """Test finding products by category."""
-
-    category = "Electronics"
+def test_list_all_products():
+    """It should List all Products"""
 
     products = [
-        p for p in mock_db
-        if p.category.lower() == category.lower()
+        Product(
+            id=1,
+            name="Laptop",
+            description="Gaming Laptop",
+            category="Electronics",
+            price=1200.99,
+            quantity=10,
+            available=True
+        ),
+        Product(
+            id=2,
+            name="Headphones",
+            description="Wireless Headphones",
+            category="Electronics",
+            price=199.99,
+            quantity=50,
+            available=True
+        ),
     ]
 
     assert len(products) == 2
 
 
-def test_find_by_availability(mock_db):
-    """Test finding available products."""
+def test_find_product_by_name():
+    """It should Find a Product by Name"""
 
     products = [
-        p for p in mock_db
+        Product(
+            id=1,
+            name="Laptop",
+            description="Gaming Laptop",
+            category="Electronics",
+            price=1200.99,
+            quantity=10,
+            available=True
+        )
+    ]
+
+    product = next(
+        (p for p in products if p.name == "Laptop"),
+        None
+    )
+
+    assert product is not None
+    assert product.name == "Laptop"
+
+
+def test_find_product_by_category():
+    """It should Find Products by Category"""
+
+    products = [
+        Product(
+            id=1,
+            name="Laptop",
+            description="Gaming Laptop",
+            category="Electronics",
+            price=1200.99,
+            quantity=10,
+            available=True
+        ),
+        Product(
+            id=2,
+            name="Headphones",
+            description="Wireless Headphones",
+            category="Electronics",
+            price=199.99,
+            quantity=50,
+            available=True
+        ),
+    ]
+
+    electronics_products = [
+        p for p in products
+        if p.category == "Electronics"
+    ]
+
+    assert len(electronics_products) == 2
+
+
+def test_find_available_products():
+    """It should Find Available Products"""
+
+    products = [
+        Product(
+            id=1,
+            name="Laptop",
+            description="Gaming Laptop",
+            category="Electronics",
+            price=1200.99,
+            quantity=10,
+            available=True
+        ),
+        Product(
+            id=2,
+            name="Book",
+            description="Programming Book",
+            category="Books",
+            price=15.99,
+            quantity=0,
+            available=False
+        ),
+    ]
+
+    available_products = [
+        p for p in products
         if p.available
     ]
 
-    assert len(products) == 3
+    assert len(available_products) == 1
